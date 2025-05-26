@@ -1,5 +1,3 @@
-# nlp-homework
-nlp
 ## 文档处理与数据抽取工具
 
 ### 📦 Python 包安装
@@ -80,7 +78,7 @@ user_prompt = "生成5月手卫生培训与专项考核报告"
 response = extract_information_fast(processor.get_data(), user_prompt, threshold=0.3)  # 建议阈值为 0.3
 ```
 
-- `data`: 数据本体，类型为 `pd.DataFrame`
+- `processor.get_data()`: 数据副本，类型为 `pd.DataFrame`
 - `user_prompt`: 用户提示语，类型为 `str`
 - `threshold`: 相似度阈值，默认为 0.3
 
