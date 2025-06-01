@@ -99,14 +99,72 @@ def extract_information_fast(data:  pd.DataFrame, user_prompt: str, threshold=0.
     # 将抽取后的信息列表拼接成字符串返回
     return "\n\n".join(extract_data_list)
 
+def extract_information_net(user_prompt: str, api_key: str, top_k: int = 3, max_len: int = 5000) -> str:
+    """
+    联网检索信息并整理为统一格式
+    :param user_prompt: 用户问题或需求
+    :param api_key: SerpAPI 密钥
+    :param top_k: 返回的网页数量
+    :param max_len: 每个网页内容的最大长度
+    :return: 整理后的字符串信息
+    """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
+
+    # Step 1: 通过 SerpAPI 搜索，拉取 top_k * 3 条数据以保证过滤后足够
+    search_url = "https://serpapi.com/search"
+    params = {
+        "q": user_prompt,
+        "api_key": api_key,
+        "engine": "google",
+        "num": top_k * 3,
+    }
+
+    try:
+        resp = requests.get(search_url, params=params, headers=headers, timeout=10)
+        results = resp.json().get("organic_results", [])
+    except Exception as e:
+        return f"[错误] 无法访问 SerpAPI：{e}"
+
+    # Step 2: 提取前 top_k 个有效链接（不包含广告）
+    links = []
+    for r in results:
+        if "link" in r:
+            links.append(r["link"])
+        if len(links) >= top_k:
+            break
+
+    if not links:
+        return "[警告] 未找到任何有效的搜索链接。"
+
+    # Step 3: 抓取网页内容
+    output = []
+    for url in links:
+        try:
+            page = requests.get(url, headers=headers, timeout=10)
+            page.encoding = page.apparent_encoding
+            soup = BeautifulSoup(page.text, "html.parser")
+            paragraphs = soup.find_all("p")
+            content = "\n".join(p.get_text().strip() for p in paragraphs if len(p.get_text().strip()) > 60)
+            content = content.strip()[:max_len]  # 可按需调整长度限制
+            if content and len(content) > 100:
+                formatted = f"===={url}====\n信息类型：网络数据\n内容：\n{content}\n"
+                output.append(formatted)
+        except Exception as e:
+            print(f"[跳过] 抓取失败：{url} 错误：{e}")
+            continue
+
+    return "\n\n".join(output) if output else "未能检索到有用信息。"
+
 if __name__ == "__main__":
 
 
 
-    processor = DocumentProcessor()
-    processor.process_file("./data/2025年5月护理部理论知识培训.docx")
-    processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
-    processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
+    # processor = DocumentProcessor()
+    # processor.process_file("./data/2025年5月护理部理论知识培训.docx")
+    # processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
+    # processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
 
     # api_key=""
     # base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -121,6 +179,12 @@ if __name__ == "__main__":
     # print(response)
 
 
-    user_prompt = "生成5月手卫生培训与专项考核报告"
-    extract_data = extract_information_fast(processor.get_data(), user_prompt, threshold=0.3)
+    # user_prompt = "生成5月手卫生培训与专项考核报告"
+    # extract_data = extract_information_fast(processor.get_data(), user_prompt, threshold=0.3)
+    # print(extract_data)
+
+    user_prompt = "生成今年第一季度新能源汽车市场报告"
+    serp_api_key = ""
+
+    extract_data = extract_information_net(user_prompt, serp_api_key, top_k=2, max_len=5000)
     print(extract_data)

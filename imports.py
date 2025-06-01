@@ -5,6 +5,9 @@ import jieba.posseg as pseg
 import re
 import pandas as pd
 from copy import deepcopy
+import requests
+from bs4 import BeautifulSoup
+
 class Client:
     def __init__(self, api_key, base_url="https://api.chatanywhere.tech/v1"):
         self.client = OpenAI(

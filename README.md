@@ -5,7 +5,7 @@
 请确保安装以下依赖：
 
 ```bash
-pip install pandas pdfplumber python-docx python-pptx pytesseract openpyxl jieba openai
+pip install pandas pdfplumber python-docx python-pptx pytesseract openpyxl jieba openai requests beautifulsoup4
 ```
 
 ---
@@ -64,10 +64,8 @@ response = extract_information(processor.get_data(), user_prompt, client, client
 
 - `data`: 数据本体，类型为 `pd.DataFrame`
 - `user_prompt`: 用户提示语，类型为 `str`
-- `client`: 接口客户端，类型为 `Client`
+- `client`: 接口客户端，类型为 `Client`，需要根据不同的供应商进行配置
 - `client_config`: 客户端配置，类型为 `dict`
-
----
 
 #### 使用 Jieba 进行粗粒度抽取
 
@@ -82,5 +80,20 @@ response = extract_information_fast(processor.get_data(), user_prompt, threshold
 - `user_prompt`: 用户提示语，类型为 `str`
 - `threshold`: 相似度阈值，默认为 0.3
 
----
+#### 使用网络检索获取数据
 
+```python
+from extract_data import extract_information_net
+
+user_prompt = "生成今年第一季度新能源汽车市场报告"
+serp_api_key = ""
+
+extract_data = extract_information_net(user_prompt, serp_api_key, top_k=2, max_len=5000)
+print(extract_data)
+```
+- `user_prompt`: 用户要求，类型为 `str`
+- `serp_api_key`: 检索API密钥，类型为 `str`，可到[官网](https://serpapi.com/)注册订阅免费额度API
+- `top_k`: 返回的检索结果网页数量，类型为 `int`
+- `max_len`: 返回的每个网页检索结果最大长度，类型为 `int`
+
+---
