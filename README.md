@@ -97,3 +97,11 @@ print(extract_data)
 - `max_len`: 返回的每个网页检索结果最大长度，类型为 `int`
 
 ---
+
+## 生成中间json文件
+**代码位置：** `generate_mid_fromraw.py`
+**输出文件位置：** `output/mid_output_from_raw.json`
+### json结构说明
+
+
+
