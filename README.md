@@ -102,6 +102,9 @@ print(extract_data)
 **代码位置：** `generate_mid_fromraw.py`
 **输出文件位置：** `output/mid_output_from_raw.json`
 ### json结构说明
+- `text`: 培训情况概览（其中"trainingcontent"设计为嵌套结构）
+- `trainingresult`: 考核情况（其中"testingcontent"可用于生成培训考核情况分析鱼骨图）
+- `col_1--col_8`: 各科室的培训、考核详细数据
 
 
 
