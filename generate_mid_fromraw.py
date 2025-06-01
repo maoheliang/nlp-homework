@@ -159,7 +159,7 @@ def convert_raw_json(input_path: str, output_path: str):
         if title == "培训概述与组织情况":
             output_json["text"] = {
                 "summary": summary,
-                "trainingcontent": process_intro_text(original_text)
+                "testingingcontent": process_intro_text(original_text)
             }
 
         elif title == "考核与评估结果":
