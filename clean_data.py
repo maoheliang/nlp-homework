@@ -91,6 +91,10 @@ class DocumentProcessor:
         """
          处理pdf文件
         """
+        def clean_line_breaks(text: str) -> str:
+            # 将非句末标点后的换行替换为空格
+            pattern = r'(?<![。！？；：)”》）\]）])\n(?!\n)'  # 换行前不是结尾符，且后面不是段落空行
+            return re.sub(pattern, '', text)
         contents = []
         full_text = []
         order = 1  # 表格从 1 开始，文本占用 order 0
@@ -117,6 +121,7 @@ class DocumentProcessor:
         # 合并所有文本页为一条内容
         if full_text:
             merged_text = "\n".join(full_text)
+            merged_text = clean_line_breaks(merged_text)
             contents.insert(0, (0, 'text', merged_text))
 
         return contents
@@ -344,5 +349,5 @@ if __name__ == "__main__":
     processor.process_file("./data/2025年5月护理部理论知识培训.docx")
     processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
     processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
-    processor.export_data()
+    # processor.export_data()
     processor.print_data_summary()
