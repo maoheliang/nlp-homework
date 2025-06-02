@@ -106,5 +106,20 @@ print(extract_data)
 - `trainingresult`: 考核情况（其中"testingcontent"可用于生成培训考核情况分析鱼骨图）
 - `col_1--col_8`: 各科室的培训、考核详细数据
 
+## 生成中间json文件（更新，以此版为准！！！）
+**代码位置：** `generate_raw_json.py`(对输入的文档进行初步内容提取）
+**输出文件位置：** `output/raw_output(1）.json`
 
+**代码位置：** `generate_mid_fromraw.py`（对output/raw_output(1）.json进行格式转换）
+**输出文件位置：** `output/mid_output_from_raw_v2.json`（作业要求的中间json文件）
+
+### json结构说明
+- "orgOverview": 培训组织概况（可用作详情页展示）
+- "trainingContent": 培训内容（采用嵌套结构，可用作树状图等制作）
+- "trainingParticipation": 培训参与情况（可用作详情页、图表等制作）
+- "assessmentDetail"：考核内容
+- "assessmentChart"：考核结果
+- "assessmentAnalysis"：考核情况分析（可用于根因分析鱼骨图制作）
+- "rectificationFlow"：总结与建议（可用作整改流程图制作，此部分内容暂缺）
+- "col_1"-"col_8"：对应手卫生培训各科室参与与考核情况统计.xlsx中各科室的详细数据
 
