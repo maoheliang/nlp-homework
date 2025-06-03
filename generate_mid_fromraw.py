@@ -1,19 +1,19 @@
 import json
 
-# ========== 读取原始 JSON ==========
-with open("./output/raw_output(1).json", "r", encoding="utf-8") as f:
+# ========== 读取原始 JSON ========== #
+with open("raw_output_ai.json", "r", encoding="utf-8") as f:
     raw_data = json.load(f)
 
 output_json = {}
 
-# ========== 1. 培训组织概况 ==========
+# ========== 1. 培训组织概况 ========== #
 org_info = raw_data[0]["培训组织概况"]
 output_json["orgOverview"] = {
     "section": "培训组织概况",
     "fields": [{"label": k, "value": v} for k, v in org_info.items()]
 }
 
-# ========== 2. 培训内容 → 嵌套结构 ==========
+# ========== 2. 培训内容 → 嵌套结构 ========== #
 content_items = raw_data[1]["培训内容"]
 nested_content = [
     {
@@ -32,14 +32,14 @@ for v in content_items.values():
     })
 output_json["trainingContent"] = nested_content
 
-# ========== 3. 培训参与情况 ==========
+# ========== 3. 培训参与情况 ========== #
 participation_info = raw_data[2]["培训参与情况"]
 output_json["trainingParticipation"] = {
     "section": "培训参与情况",
     "fields": [{"label": k, "value": v} for k, v in participation_info.items()]
 }
 
-# ========== 4. 考核内容、结果、自动分析 ==========
+# ========== 4. 考核内容、结果、自动分析 ========== #
 assessment_detail = raw_data[3]["考核内容"]
 assessment_result = raw_data[4]["考核结果"]
 assessment_analysis = raw_data[5]["考核分析"]
@@ -72,15 +72,9 @@ output_json["assessmentAnalysis"] = {
     "causes": auto_causes
 }
 
-output_json["rectificationFlow"] = {
-    "section": "总结与建议",
-    "steps": []  # 可扩展为自动生成流程图步骤
-}
-
-# ========== 5. 各科室参与与考核统计 Sheet 拆分 ==========
+# ========== 5. 各科室参与与考核统计 Sheet 拆分 ========== #
 sheet_data = raw_data[7]["手卫生培训各科室参与与考核情况统计"]["Sheet1"]
 
-# 自动提取所有统计字段
 columns = [key for key in sheet_data[0].keys() if key != "科室名称"]
 for i, field in enumerate(columns):
     col_key = f"col_{i+1}"
@@ -91,7 +85,10 @@ for i, field in enumerate(columns):
             continue
         raw_value = row.get(field, "")
         if isinstance(raw_value, str) and "%" in raw_value:
-            value = float(raw_value.replace("%", ""))
+            try:
+                value = float(raw_value.replace("%", ""))
+            except:
+                value = raw_value
         elif isinstance(raw_value, str) and raw_value.isdigit():
             value = int(raw_value)
         else:
@@ -106,8 +103,52 @@ for i, field in enumerate(columns):
         "data": data_list
     }
 
-# ========== 写入为结构化 JSON 文件 ==========
-with open("mid_output_from_raw_v2.json", "w", encoding="utf-8") as f:
+# ========== 6. 读取并处理 conclusion.json ========== #
+import re
+
+with open("conclusion.json", "r", encoding="utf-8") as f:
+    conclusion = json.load(f)
+
+summary_text = conclusion.get("总结", "")
+suggestions = conclusion.get("建议", [])
+
+# 自动提取建议编号（例如 1、2、3）及其对应内容
+suggestion_dict = {}
+pattern = r"^(\d+)[、.](.+)"
+
+for item in suggestions:
+    match = re.match(pattern, item.strip())
+    if match:
+        idx = int(match.group(1))
+        text = match.group(2).strip()
+        suggestion_dict[idx] = text
+    else:
+        # 非标准格式建议直接按顺序编号添加
+        suggestion_dict[len(suggestion_dict) + 1] = item.strip()
+
+# 构造 steps（按编号排序）
+steps = []
+for idx in sorted(suggestion_dict.keys()):
+    steps.append({
+        "id": f"rec_{idx}",
+        "label": suggestion_dict[idx],
+        "value": suggestion_dict[idx]
+    })
+
+output_json["conclusionSummary"] = {
+    "title": "总结与改进建议",
+    "summary": {
+        "section": "总结",
+        "content": summary_text
+    },
+    "rectificationFlow": {
+        "section": "建议",
+        "steps": steps
+    }
+}
+
+# ========== 写入结构化 JSON 文件 ========== #
+with open("mid_output_from_raw_v3.json", "w", encoding="utf-8") as f:
     json.dump(output_json, f, ensure_ascii=False, indent=2)
 
 print("mid_output_from_raw_v2.json 已生成")
