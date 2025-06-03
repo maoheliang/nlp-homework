@@ -40,6 +40,9 @@ data_copy = processor.get_data()
 
 # 获取原始数据本体
 data = processor.data
+
+# 将所有数据处理为字符串输出
+str_data = processor.get_str_data()
 ```
 
 ---

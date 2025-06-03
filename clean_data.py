@@ -386,6 +386,20 @@ class DocumentProcessor:
     def get_data(self)-> pd.DataFrame:
         # 返回历史记录的副本
         return deepcopy(self.data)
+    
+    def get_str_data(self)-> str:
+        """
+        将数据转化为字符串表示输出
+        """
+        grouped = self.data.groupby("filename")
+        str_data = ""
+        for filename, group in grouped:
+            str_data += f"\n=== 📄 文件: {filename}===\n\n"
+            for _, row in group.iterrows():
+                str_data += f"信息类型: {row['filetype']}\n\n"   
+                str_data += f"内容: {row['content']}\n"
+        return str_data
+
 
     def export_data(self, out_file="./data/report.xlsx"):
         """

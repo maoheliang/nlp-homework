@@ -165,6 +165,7 @@ if __name__ == "__main__":
     processor.process_file("./data/2025年5月护理部理论知识培训.docx")
     processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
     processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
+    processor.process_file("./data/2025年第一季度中国新能源汽车市场分析报告.docx")
 
     # api_key=""
     # base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -189,7 +190,7 @@ if __name__ == "__main__":
     # print(extract_data)
 
     # user_prompt = "生成2025年5月份护理部的理论知识培训报告"
-    user_prompt = "生成手卫生培训考核方式报告"
+    user_prompt = "生成今年第一季度新能源汽车市场报告"
     extract_data = processor.retriever.search_by_threshold(user_prompt, threshold=0.55, return_scores=False)
     # extract_data = processor.retriever.search(user_prompt,top_k=2, return_scores=True)
     print(extract_data)
