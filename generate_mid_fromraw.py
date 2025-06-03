@@ -1,7 +1,7 @@
 import json
 
 # ========== 读取原始 JSON ========== #
-with open("raw_output_ai.json", "r", encoding="utf-8") as f:
+with open("C:\\A课程作业\\nlp\\nlp-homework-main\\input\\raw_output_pdf_and_xlsx.json", "r", encoding="utf-8") as f:
     raw_data = json.load(f)
 
 output_json = {}
@@ -33,9 +33,9 @@ for v in content_items.values():
 output_json["trainingContent"] = nested_content
 
 # ========== 3. 培训参与情况 ========== #
-participation_info = raw_data[2]["培训参与情况"]
+participation_info = raw_data[2]["培训参与情况和分析"]
 output_json["trainingParticipation"] = {
-    "section": "培训参与情况",
+    "section": "培训参与情况和分析",
     "fields": [{"label": k, "value": v} for k, v in participation_info.items()]
 }
 
@@ -54,59 +54,70 @@ output_json["assessmentChart"] = {
     "metrics": [{"label": k, "value": v} for k, v in assessment_result.items()]
 }
 
-# ✅ 自动提取“鱼骨图”根因字段
-cause_keys = ["操作评估存在问题", "不及格主要原因"]
+#  自动提取“鱼骨图”根因字段
+main_problem = ""
 auto_causes = []
-for key in cause_keys:
-    if key in assessment_result:
-        value = assessment_result[key]
-        details = value.split("、") if "、" in value else [value]
-        auto_causes.append({
-            "category": key,
-            "details": details
-        })
+
+for key, value in assessment_analysis.items():
+    if not value:
+        continue  # 跳过空内容
+    # 如果 key 中含有“主要原因”或“根本原因”，认为是 mainProblem
+    if any(kw in key for kw in ["主要原因", "根本原因", "关键问题", "主因"]):
+        main_problem = value.strip()
+        details = [main_problem]
+    else:
+        # 其他字段仍作为鱼骨图的分类原因
+        details = value.split("、") if "、" in value else [value.strip()]
+    auto_causes.append({
+        "category": key,
+        "details": details
+    })
 
 output_json["assessmentAnalysis"] = {
     "section": "考核情况分析（鱼骨图）",
-    "mainProblem": assessment_analysis.get("主要问题", ""),
+    "mainProblem": main_problem,
     "causes": auto_causes
 }
 
 # ========== 5. 各科室参与与考核统计 Sheet 拆分 ========== #
-sheet_data = raw_data[7]["手卫生培训各科室参与与考核情况统计"]["Sheet1"]
+if len(raw_data) > 6 and "手卫生培训各科室参与与考核情况统计" in raw_data[6]:
+    sheet_info = raw_data[6]["手卫生培训各科室参与与考核情况统计"]
+    if "Sheet1" in sheet_info:
+        sheet_data = sheet_info["Sheet1"]
 
-columns = [key for key in sheet_data[0].keys() if key != "科室名称"]
-for i, field in enumerate(columns):
-    col_key = f"col_{i+1}"
-    unit = "%" if any("率" in field or "%" in str(row.get(field, "")) for row in sheet_data) else "人"
-    data_list = []
-    for row in sheet_data:
-        if row["科室名称"] == "合计":
-            continue
-        raw_value = row.get(field, "")
-        if isinstance(raw_value, str) and "%" in raw_value:
-            try:
-                value = float(raw_value.replace("%", ""))
-            except:
-                value = raw_value
-        elif isinstance(raw_value, str) and raw_value.isdigit():
-            value = int(raw_value)
-        else:
-            try:
-                value = float(raw_value)
-            except:
-                value = raw_value
-        data_list.append({"name": row["科室名称"], "value": value})
-    output_json[col_key] = {
-        "unit": unit,
-        "name": field,
-        "data": data_list
-    }
+        columns = [key for key in sheet_data[0].keys() if key != "科室名称"]
+        for i, field in enumerate(columns):
+            col_key = f"col_{i+1}"
+            unit = "%" if any("率" in field or "%" in str(row.get(field, "")) for row in sheet_data) else "人"
+            data_list = []
+            for row in sheet_data:
+                if row["科室名称"] == "合计":
+                    continue
+                raw_value = row.get(field, "")
+                if isinstance(raw_value, str) and "%" in raw_value:
+                    try:
+                        value = float(raw_value.replace("%", ""))
+                    except:
+                        value = raw_value
+                elif isinstance(raw_value, str) and raw_value.isdigit():
+                    value = int(raw_value)
+                else:
+                    try:
+                        value = float(raw_value)
+                    except:
+                        value = raw_value
+                data_list.append({"name": row["科室名称"], "value": value})
+            output_json[col_key] = {
+                "unit": unit,
+                "name": field,
+                "data": data_list
+            }
+
 
 # ========== 6. 读取并处理 conclusion.json ========== #
 import re
 
-with open("conclusion.json", "r", encoding="utf-8") as f:
+with open("C:\\A课程作业\\nlp\\nlp-homework-main\\input\\conclusion_pdf_and_xlsx.json", "r", encoding="utf-8") as f:
     conclusion = json.load(f)
 
 summary_text = conclusion.get("总结", "")
@@ -131,7 +142,7 @@ steps = []
 for idx in sorted(suggestion_dict.keys()):
     steps.append({
         "id": f"rec_{idx}",
-        "label": suggestion_dict[idx],
+        "label": "建议内容",
         "value": suggestion_dict[idx]
     })
 
@@ -148,7 +159,7 @@ output_json["conclusionSummary"] = {
 }
 
 # ========== 写入结构化 JSON 文件 ========== #
-with open("mid_output_from_raw_v3.json", "w", encoding="utf-8") as f:
+with open("C:\\A课程作业\\nlp\\nlp-homework-main\\input\\mid_output_pdf_and_xlsx.json", "w", encoding="utf-8") as f:
     json.dump(output_json, f, ensure_ascii=False, indent=2)
 
-print("mid_output_from_raw_v2.json 已生成")
+print("json 已生成")
