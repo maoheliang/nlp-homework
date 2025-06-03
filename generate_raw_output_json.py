@@ -62,7 +62,7 @@ def use_ai_get_mid_output(full_text, client: Client, client_config: dict):
         "    }\n"
         "  },\n"
         "  {\n"
-        "    \"培训参与情况\": {\n"
+        "    \"培训参与情况和分析\": {\n"
         "      \"应参加人数\": \"\",\n"
         "      \"实际参与人数\": \"\",\n" 
         "      \"覆盖正式护士人次\": \"\",\n" 
@@ -75,10 +75,6 @@ def use_ai_get_mid_output(full_text, client: Client, client_config: dict):
         "      \"线上课程学习平均用时\": \"\",\n"
         "      \"正确率均值\": \"\",\n"
         "      \"受训者看法\": \"\",\n"
-        "    }\n"
-        "  },\n"
-        "  {\n"
-        "    \"培训问题和分析\": {\n"
         "      \"存在问题\": \"\",\n"
         "      \"整改措施\": \"\",\n"
         "      \"未完成学习科室及原因\": \"\",\n"   
@@ -93,20 +89,15 @@ def use_ai_get_mid_output(full_text, client: Client, client_config: dict):
         "    }\n"
         "  },\n"
         "  {\n"
-        "    \"考核结果\": {\n"
+        "    \"考核结果和分析\": {\n"
         "      \"理论考试参与人数\": \"\",\n"
         "      \"理论考试参考率\": \"\",\n"
         "      \"理论考试平均成绩\": \"\",\n"
         "      \"操作评估合格率\": \"\",\n"
         "      \"最终通过率\": \"\",\n"
         "      \"不及格人数\": \"\",\n"
-        "    }\n"
-        "  },\n"
-        "  {\n"
-        "    \"考核问题和原因\": {\n"
         "      \"考核类型及存在问题\": \"\",\n"
         "      \"不及格主要原因\": \"\"\n"
-        "      \"存在问题\": \"\",\n"
         "      \"整改措施\": \"\",\n"
         "    }\n"
         "  },\n"
@@ -164,7 +155,7 @@ def use_ai_get_mid_output(full_text, client: Client, client_config: dict):
     #     f"{full_text}\n"
     # )
     response = client.chat(prompt, **client_config)
-    print(f'response=\n{response}\n-------------------\n')
+    # print(f'response=\n{response}\n-------------------\n')
     result=deal_response(response)
     return result
 
@@ -242,7 +233,7 @@ def use_ai_get_conclusion(full_text, client: Client, client_config: dict):
     )
 
     response = client.chat(concluseion_prompt, **client_config)
-    print(response)
+    # print(response)
     result=deal_response(response)
     with open('conclusion.json','w',encoding='utf=8') as f:
         json.dump(result,f,ensure_ascii=False,indent=2)
@@ -252,10 +243,10 @@ if __name__ == "__main__":
     start_time=time.time()
     processor = DocumentProcessor()
     processor.process_file("./data/2025年5月护理部理论知识培训.docx")
-    processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
-    processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
-    # user_prompt =  "生成护理部理论知识培训报告"
-    user_prompt = "生成5月手卫生培训与专项考核报告"
+    # processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
+    # processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
+    user_prompt =  "生成护理部理论知识培训报告"
+    # user_prompt = "生成5月手卫生培训与专项考核报告"
     extract_data = extract_information_fast(processor.get_data(), user_prompt, threshold=0.3)
 
     api_key="your-api-key"
@@ -270,8 +261,9 @@ if __name__ == "__main__":
     raw_output = use_ai_get_mid_output(full_text, client, client_config)
     
     raw_output.extend(table_data)
-    # with open('raw_output_pdf.json','w',encoding='utf-8') as f:
+    # with open('raw_output_word.json','w',encoding='utf-8') as f:
     #     json.dump(raw_output,f,ensure_ascii=False,indent=2)
+
     # ai生成总结和建议
     use_ai_get_conclusion(extract_data, client, client_config)
 
