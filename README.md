@@ -5,9 +5,14 @@
 请确保安装以下依赖：
 
 ```bash
-pip install pandas pdfplumber python-docx python-pptx pytesseract openpyxl jieba openai requests beautifulsoup4
+pip install pandas pdfplumber python-docx python-pptx pytesseract openpyxl jieba openai requests beautifulsoup4 sentence_transformers hnswlib
 ```
+jieba推荐版本0.41.0
 
+如果使用embedding模型并且使用GPU计算需要安装pytorch：
+```bash
+pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu124
+```
 ---
 
 ### 🧹 文件处理和清洗
@@ -80,7 +85,36 @@ response = extract_information_fast(processor.get_data(), user_prompt, threshold
 - `user_prompt`: 用户提示语，类型为 `str`
 - `threshold`: 相似度阈值，默认为 0.3
 
-#### 使用网络检索获取数据
+#### 使用嵌入模型检索提取
+需在processor初始化时开启嵌入模型检索功能
+```python
+processor = DocumentProcessor(
+    use_retriever=True, 
+    model_name: str = "./models/bge-small-zh-v1.5", 
+    device="cpu"
+)
+user_prompt = "生成2025年5月份护理部的理论知识培训报告"
+extract_data = processor.retriever.search_by_threshold(user_prompt, threshold=0.55, return_scores=True)
+extract_data = processor.retriever.search(user_prompt,top_k=2, return_scores=True)
+```
+- `use_retriever`默认为`False`
+- `device`可指定GPU：`"cuda:0"`，需要安装pytorch
+- `model_name`可指定模型路径，默认为 `"./models/bge-small-zh-v1.5"`，可以到[huggingface](https://huggingface.co/BAAI/bge-small-zh-v1.5)下载模型并放至相应位置
+- `search_by_threshold`筛选出相关度超过阈值的所有文档信息，`threshold`为相似度阈值，推荐默认`0.55`，本项目推荐使用该方法
+- `search`返回`top_k`个相关度最高的文档信息，适用于大量文档
+- `return_scores`返回文档相关度分数，用于debug
+  - 用于debug，默认关闭，直接返回字符串结果
+  - 开启后返回`(文档信息字符串，相关度分数)`元组列表
+
+#### 三种方法对比
+---
+|  | 大模型提取 | 关键词匹配提取 | 嵌入模型检索提取 |
+|:-:|:-:|:-:|:-:|
+|提取速度|慢|快|中等|
+|提取结果|准确|一般|较准|
+---
+
+#### 使用网络检索获取额外数据
 
 ```python
 from extract_data import extract_information_net

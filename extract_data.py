@@ -56,7 +56,7 @@ def extract_information_fast(data:  pd.DataFrame, user_prompt: str, threshold=0.
             d_tokens = list(jieba.cut(doc))
         elif process_func == "extract_tags":
             # 使用jieba提取关键词
-            d_tokens = jieba.analyse.extract_tags(doc, topK=20, withWeight=False, allowPOS=('ns', 'n', 'vn', 'v', 'nt', 'nr'))
+            d_tokens = analyse.extract_tags(doc, topK=20, withWeight=False, allowPOS=('ns', 'n', 'vn', 'v', 'nt', 'nr'))
         else:
             raise ValueError(f"Unsupported process_func: {process_func}")
 
@@ -161,10 +161,10 @@ if __name__ == "__main__":
 
 
 
-    # processor = DocumentProcessor()
-    # processor.process_file("./data/2025年5月护理部理论知识培训.docx")
-    # processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
-    # processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
+    processor = DocumentProcessor(use_retriever=True, device="cuda:0")
+    processor.process_file("./data/2025年5月护理部理论知识培训.docx")
+    processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
+    processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
 
     # api_key=""
     # base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -179,12 +179,17 @@ if __name__ == "__main__":
     # print(response)
 
 
-    # user_prompt = "生成5月手卫生培训与专项考核报告"
+    # user_prompt = "生成2025年5月份护理部的理论知识培训报告"
     # extract_data = extract_information_fast(processor.get_data(), user_prompt, threshold=0.3)
     # print(extract_data)
 
-    user_prompt = "生成今年第一季度新能源汽车市场报告"
-    serp_api_key = ""
+    # user_prompt = "生成今年第一季度新能源汽车市场报告"
+    # serp_api_key = ""
+    # extract_data = extract_information_net(user_prompt, serp_api_key, top_k=2, max_len=5000)
+    # print(extract_data)
 
-    extract_data = extract_information_net(user_prompt, serp_api_key, top_k=2, max_len=5000)
+    # user_prompt = "生成2025年5月份护理部的理论知识培训报告"
+    user_prompt = "生成手卫生培训考核方式报告"
+    extract_data = processor.retriever.search_by_threshold(user_prompt, threshold=0.55, return_scores=False)
+    # extract_data = processor.retriever.search(user_prompt,top_k=2, return_scores=True)
     print(extract_data)

@@ -17,16 +17,116 @@ if platform.system() == "Windows":
 elif platform.system() == "Linux":
     import subprocess
 
+class IncrementalDocumentRetriever:
+    def __init__(self, model_name="./models/bge-small-zh-v1.5", space="cosine", ef_construction=200, M=16, device="cpu"):
+        self.model = SentenceTransformer(model_name, device=device)
+        self.space = space
+        self.ef_construction = ef_construction
+        self.M = M
+        self.index = None
+        self.dim = None
+        self.documents = []  # list of texts
+        self.doc_ids = []    # list of unique int IDs
+        self.id_counter = 0  # next doc id
+
+    def _preprocess(self, text):
+        return "为这个句子生成表示以用于检索相关文章：" + text
+
+    def _get_embedding(self, text):
+        processed = self._preprocess(text)
+        return self.model.encode([processed], normalize_embeddings=True)[0]
+
+    def _init_index(self, dim):
+        self.index = hnswlib.Index(space=self.space, dim=dim)
+        self.index.init_index(max_elements=10000, ef_construction=self.ef_construction, M=self.M)
+        self.index.set_ef(50)
+
+    def add_document(self, text: str):
+        embedding = self._get_embedding(text)
+        if self.index is None:
+            self.dim = embedding.shape[0]
+            self._init_index(self.dim)
+
+        doc_id = self.id_counter
+        self.index.add_items([embedding], [doc_id])
+        self.documents.append(text)
+        self.doc_ids.append(doc_id)
+        self.id_counter += 1
+
+    def search(self, query, top_k=5, return_scores=False) -> Union[List[Tuple[str, float]], str]:
+        if self.index is None or self.id_counter == 0:
+            raise ValueError("No documents indexed yet.")
+        query_vec = self._get_embedding(query)
+        labels, distances = self.index.knn_query(query_vec, k=min(top_k, self.id_counter))
+        results = []
+        for idx, dist in zip(labels[0], distances[0]):
+            text = self.documents[self.doc_ids.index(idx)]
+            score = 1 - dist
+            results.append((text, score))
+        if return_scores:
+            return results
+        else:
+            return "\n".join([text for text, _ in results])
+    
+    def search_by_threshold(self, query: str, threshold: float = 0.3, return_scores: bool = False) -> Union[List[Tuple[str, float]], str]:
+        if self.index is None or self.id_counter == 0:
+            raise ValueError("No documents indexed yet.")
+        
+        query_vec = self._get_embedding(query)
+        # brute-force 所有文档余弦相似度（比用 index 快不了太多，因为 hnswlib 不支持 range query）
+        similarities = []
+        for idx, doc_id in enumerate(self.doc_ids):
+            doc_vec = self.index.get_items([doc_id])[0]
+            score = np.dot(query_vec, doc_vec)  # 因为是 normalize 后的向量
+            if score >= threshold:
+                similarities.append((self.documents[idx], score))
+        
+        # 按相似度从高到低排序
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        if return_scores:
+            return similarities
+        else:
+            return "\n".join([text for text, _ in similarities])
+
+    def save(self, index_path: str, meta_path: str):
+        if self.index:
+            self.index.save_index(index_path)
+        meta = {
+            "documents": self.documents,
+            "doc_ids": self.doc_ids,
+            "id_counter": self.id_counter,
+            "dim": self.dim
+        }
+        with open(meta_path, "w", encoding="utf-8") as f:
+            json.dump(meta, f, ensure_ascii=False, indent=2)
+
+    def load(self, index_path: str, meta_path: str):
+        if not os.path.exists(index_path) or not os.path.exists(meta_path):
+            raise FileNotFoundError("Index or metadata file not found.")
+
+        with open(meta_path, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+            self.documents = meta["documents"]
+            self.doc_ids = meta["doc_ids"]
+            self.id_counter = meta["id_counter"]
+            self.dim = meta["dim"]
+
+        self.index = hnswlib.Index(space=self.space, dim=self.dim)
+        self.index.load_index(index_path)
+        self.index.set_ef(50)
+
 class DocumentProcessor:
     """
     处理文档的类
     """
-    def __init__(self):
+    def __init__(self, use_retriever=False, model_name="./models/bge-small-zh-v1.5", device="cpu"):
         os.makedirs("./data", exist_ok=True)
         self.data = pd.DataFrame(columns=[
             "filename", "filetype", "content", "content_type", 
             "order_index", "timestamp"
         ])
+        if use_retriever:
+            self.retriever = IncrementalDocumentRetriever(model_name=model_name, device=device)
 
     def process_file(self, filepath):
         """
@@ -86,6 +186,13 @@ class DocumentProcessor:
         if records:
             new_records = pd.DataFrame(records)
             self.data = pd.concat([self.data, new_records], ignore_index=True)
+            if hasattr(self, 'retriever'):
+                record_str=f"====文件名：{filepath}====\n\n"
+                for record in records:
+                    record_str+=f"信息类型：{record['content_type']}\n\n"
+                    record_str+=f"内容：{record['content']}\n"
+                # print(record_str)
+                self.retriever.add_document(record_str)
 
     def _process_pdf(self, filepath):
         """
@@ -344,10 +451,12 @@ class DocumentProcessor:
                 print(f"    内容预览:\n    {preview_str}")
 
 
+
 if __name__ == "__main__":
-    processor = DocumentProcessor()
+    processor = DocumentProcessor(use_retriever=True,device="cpu")
     processor.process_file("./data/2025年5月护理部理论知识培训.docx")
     processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
     processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
     # processor.export_data()
-    processor.print_data_summary()
+
+    # processor.print_data_summary()
