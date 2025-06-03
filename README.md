@@ -135,7 +135,7 @@ print(extract_data)
 
 ## 生成中间json文件（更新，以此版为准！！！）
 **代码位置：** `generate_raw_json.py`(对输入的文档进行初步内容提取）
-**输出文件位置：** `output/raw_output(1）.json`
+**输出文件位置：** `output/raw_output_pdf_and_xlsx.json.json`  `output/raw_output_word.json`
 
 **代码位置：** `generate_mid_fromraw.py`（对output/raw_output(1）.json进行格式转换）
 **输出文件位置：** `output/mid_output_pdf_and_xlsx.json`  `output/mid_output_word.json`（作业要求的中间json文件）
