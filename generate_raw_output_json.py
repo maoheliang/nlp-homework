@@ -77,7 +77,6 @@ def use_ai_get_mid_output(full_text, client: Client, client_config: dict):
         "      \"受训者看法\": \"\",\n"
         "      \"存在问题\": \"\",\n"
         "      \"整改措施\": \"\",\n"
-        "      \"未完成学习科室及原因\": \"\",\n"   
         "    }\n"
         "  },\n"
         "  {\n"
@@ -89,13 +88,17 @@ def use_ai_get_mid_output(full_text, client: Client, client_config: dict):
         "    }\n"
         "  },\n"
         "  {\n"
-        "    \"考核结果和分析\": {\n"
+        "    \"考核结果\": {\n"
         "      \"理论考试参与人数\": \"\",\n"
         "      \"理论考试参考率\": \"\",\n"
         "      \"理论考试平均成绩\": \"\",\n"
         "      \"操作评估合格率\": \"\",\n"
         "      \"最终通过率\": \"\",\n"
         "      \"不及格人数\": \"\",\n"
+        "    }\n"
+        "  },\n"
+        "  {\n"
+        "    \"考核问题和分析\": {\n"
         "      \"考核类型及存在问题\": \"\",\n"
         "      \"不及格主要原因\": \"\"\n"
         "      \"整改措施\": \"\",\n"
@@ -261,9 +264,8 @@ if __name__ == "__main__":
     raw_output = use_ai_get_mid_output(full_text, client, client_config)
     
     raw_output.extend(table_data)
-    # with open('raw_output_word.json','w',encoding='utf-8') as f:
-    #     json.dump(raw_output,f,ensure_ascii=False,indent=2)
-
+    with open('raw_output_word.json','w',encoding='utf-8') as f:
+        json.dump(raw_output,f,ensure_ascii=False,indent=2)
     # ai生成总结和建议
     use_ai_get_conclusion(extract_data, client, client_config)
 
