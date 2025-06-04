@@ -4,29 +4,44 @@ from jinja2 import Template
 
 # 读取 JSON 数据
 # jsonfile = "mid_output.json"
-jsonfile = "mid_output_from_raw_v2.json"
+# jsonfile = "mid_output_from_raw_v2.json"
+jsonfile = "mid_output_pdf_and_xlsx.json"
 with open(jsonfile, "r", encoding="utf-8") as f:
     data = json.load(f)
 
 # 图表 1：参训人数柱状图
-departments = [item["name"] for item in data["joinWard"]["data"]]
-join_values = [item["value"] for item in data["joinWard"]["data"]]
+departments = [item["name"] for item in data["col_2"]["data"]]
+join_values = [item["value"] for item in data["col_2"]["data"]]
+nojoin_values = [item["value"] for item in data["col_3"]["data"]]
 bar_chart = go.Figure(data=[
-    go.Bar(name='参训人数', x=departments, y=join_values, marker_color='rgb(52, 152, 219)')
+    go.Bar(name='参训人数', x=departments, y=join_values, marker_color='rgb(52, 152, 219)'),
+    go.Bar(name='缺勤人数', x=departments, y=nojoin_values, marker_color='rgb(52, 152, 29)')
 ])
 bar_chart.update_layout(
-    title={'text': '各科室参与培训人数', 'x': 0.5, 'xanchor': 'center'},
+    title={'text': '各科室参与培训情况', 'x': 0.5, 'xanchor': 'center'},
+    barmode='stack',
     xaxis_title='科室', yaxis_title='人数'
 )
 
+# departments2 = [item["name"] for item in data["col_2"]["data"]]
+# join_values2 = [item["value"] for item in data["col_2"]["data"]]
+# bar_chart = go.Figure(data=[
+#     go.Bar(name='参训人数', x=departments2, y=join_values2, marker_color='rgb(52, 152, 219)')
+# ])
+# bar_chart.update_layout(
+#     title={'text': '各科室参与培训人数', 'x': 0.5, 'xanchor': 'center'},
+#     xaxis_title='科室', yaxis_title='人数'
+# )
+
 # 图表 2：问题分析饼图
-problem_labels = [item["name"] for item in data["trainingQuestion"]["data"]]
-problem_values = [item["proportion"] for item in data["trainingQuestion"]["data"]]
+problem_labels = [item["name"] for item in data["col_3"]["data"]]
+problem_values = [item["value"] for item in data["col_3"]["data"]]
+problem = data["col_3"]["name"]
 pie_chart = go.Figure(data=[
     go.Pie(labels=problem_labels, values=problem_values, hole=0.3)
 ])
 pie_chart.update_layout(
-    title={'text': '培训存在问题分析', 'x': 0.5, 'xanchor': 'center'}
+    title={'text': problem, 'x': 0.5, 'xanchor': 'center'}
 )
 
 # 转换为 HTML 片段
@@ -41,6 +56,12 @@ html_template = """
     <meta charset="UTF-8">
     <title>护理部培训可视化报告</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="module">
+    {% raw %}
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+        {% endraw %}
+    </script>
     <style>
         body { font-family: "Segoe UI", sans-serif; margin: 40px; background: #f8f9fa; color: #2c3e50; }
         h1, h2 { color: #2c3e50; }
@@ -53,79 +74,131 @@ html_template = """
         p { line-height: 1.6; }
 
         .chart-box { margin: 0 auto; max-width: 800px; }
+        .mermaid {
+            margin: 0 auto; 
+            max-width: 800px; 
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+        }
+        .quote-block {
+            background: #f9f9f9;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            color: #333;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
     <h1>护理部培训可视化报告（2025年5月）</h1>
 
     <div class="section">
-        <h2>一、培训情况总览</h2>
-        <table>
-            <tr><th>项目</th><th>数据</th></tr>
-            <tr><td>培训类型</td><td>{{ trainingType }}</td></tr>
-            <tr><td>培训时间</td><td>{{ time_range }}</td></tr>
-            <tr><td>主讲人</td><td>{{ speaker }}</td></tr>
-            <tr><td>学时/学分</td><td>{{ speaker_credit }}</td></tr>
-            <tr><td>培训对象</td><td>{{ remark }}</td></tr>
-            <tr><td>培训形式</td><td>{{ line }}</td></tr>
-            <tr><td>参训人数</td><td>{{ join }}</td></tr>
-            <tr><td>缺勤人数</td><td>{{ nojoin }}</td></tr>
-            <tr><td>参训率</td><td>{{ rate }}%</td></tr>
-        </table>
+    <!-- %%ORG_OVERVIEW_TABLE%% -->
+        
     </div>
 
     <div class="section">
-        <h2>二、各科室参与情况</h2>
+        <h2>二、{{caption2}}</h2>
         <div class="chart-box">
             {{ bar_chart | safe }}
         </div>
     </div>
 
     <div class="section">
-        <h2>三、培训存在问题</h2>
+        <h2>三、{{ problem }}</h2>
         <div class="chart-box">
             {{ pie_chart | safe }}
         </div>
     </div>
 
-    <div class="section">
+    <div class="quote-block">
         <h2>四、总结&建议</h2>
         <p>{{ evaluation }}</p>
+        <hr>
+        <p>1.{{ advice1 }}</p>
+        <p>2.{{ advice2 }}</p>
+        <p>3.{{ advice3 }}</p>
     </div>
-
-    # <div class="section">
-    #     <h2>五、存在问题总结</h2>
-    #     <p>{{ problem }}</p>
-    # </div>
-
-    # <div class="section">
-    #     <h2>六、改进建议措施</h2>
-    #     <p>{{ improvement }}</p>
+    <div class="section">
+        <h2>五、流程图</h2>
+        <div class="mermaid">
+            {{ mermaid_code }}
+        </div>
     </div>
+    <div class="section">
+        <h2>六、鱼骨图</h2>
+        
+    </div>
+    
 </body>
 </html>
 """
+def generate_mermaid_graph(data):
+    overview = {item['label']: item['value'] for item in data['orgOverview']['fields']}
+    participation = {item['label']: item['value'] for item in data['trainingParticipation']['fields']}
+    metrics = {item['label']: item['value'] for item in data['assessmentChart']['metrics']}
+    rect_steps = data['conclusionSummary']['rectificationFlow']['steps']
 
+    # 使用默认值避免空字段导致图表破损
+    def get_safe(value): return value if value else "N/A"
+
+    step_nodes = ''
+    last_step = 'J'
+    for index, step in enumerate(rect_steps):
+        node_id = f"R{index + 1}"
+        step_nodes += f'\n  {last_step} --> {node_id}["{get_safe(step["value"])}"]'
+        last_step = node_id
+
+    mermaid_text = f"""
+graph TD
+  A[启动专项培训\\n{get_safe(overview.get("培训主题"))}] --> B[组织部门: {get_safe(overview.get("组织部门"))}]
+  B --> C[培训形式: {get_safe(overview.get("培训形式"))}]
+  C --> D[培训内容实施]
+  D --> E[整体参训率: {get_safe(participation.get("整体参训率"))}]
+  E --> F[理论考试平均成绩: {get_safe(metrics.get("理论考试平均成绩"))}]
+  F --> G[操作合格率: {get_safe(metrics.get("操作评估合格率"))}]
+  G --> H{{是否达标}}
+  H -- 是 --> I[最终通过率: {get_safe(metrics.get("最终通过率"))}]
+  H -- 否 --> J[问题分析: {get_safe(participation.get("存在问题"))}]
+  I --> K[总结与持续改进]{step_nodes}
+"""
+    return mermaid_text.strip()
+mermaid_code = generate_mermaid_graph(data)
+overview = data["orgOverview"]
+section_title = overview["section"]
+fields = overview["fields"]
+html_table = f'<h2>{section_title}</h2>\n<table border="1" cellspacing="0" cellpadding="5">\n'
+html_table += "<tr><th>项目</th><th>内容</th></tr>\n"
+
+for item in fields:
+    label = item["label"]
+    value = item["value"] if item["value"] else "/"
+    html_table += f"<tr><td>{label}</td><td>{value}</td></tr>\n"
+
+html_table += "</table>"
+
+final_html = html_template.replace("<!-- %%ORG_OVERVIEW_TABLE%% -->", html_table)
 # 渲染 HTML
-template = Template(html_template)
+template = Template(final_html)
 rendered_html = template.render(
-    trainingType=data["trainingContents"]["trainingTypeName"],
-    speaker=data["trainingContents"]["trainingSpeaker"],
-    speaker_credit=data["trainingContents"]["speakerCreditStr"],
-    remark=data["trainingContents"]["trainingRemark"],
-    line=data["trainingContents"]["trainingLineName"],
-    time_range=data["trainingContents"]["sessionStr"]["items"][0]["item"]["contents"][0]["text"],
-    join=data["trainingContents"]["joinTrainingNum"],
-    nojoin=data["trainingContents"]["noJoinNum"],
-    rate=data["trainingContents"]["joinRate"],
+    caption1=data['orgOverview']['section'],
+    caption2=data['trainingParticipation']['section'],
+    
     bar_chart=bar_html,
     pie_chart=pie_html,
-    evaluation=data["rectificationFlow"],
-    problem=data["existQuestion"],
-    improvement=data["improvementMeasures"]
+    evaluation=data["conclusionSummary"]['summary']['content'],
+    problem=data["col_3"]["name"],
+    advice1=data['conclusionSummary']['rectificationFlow']['steps'][0]['value'],
+    advice2=data['conclusionSummary']['rectificationFlow']['steps'][1]['value'],
+    advice3=data['conclusionSummary']['rectificationFlow']['steps'][2]['value'],
+    mermaid_code=mermaid_code
 )
 
-output = jsonfile[:-4] + ".html"
+output = jsonfile[:-4] + "html"
 # 写入输出 HTML 文件
 with open(output, "w", encoding="utf-8") as f:
     f.write(rendered_html)
