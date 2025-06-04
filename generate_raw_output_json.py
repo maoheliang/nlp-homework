@@ -24,14 +24,15 @@ def deal_response(response):
 def use_ai_get_mid_output(full_text, client: Client, client_config: dict):
 
     prompt = (
-        "你是医疗培训数据提取专家，请根据原始文档内容严格填充以下JSON模板。要求：\n"
+        "你是医疗培训数据提取专家,请根据原始文档内容严格填充以下JSON模板。有要求：\n"
         "\n"
         "### 核心规则\n"
-        "1. **原文提取**：仅使用文档中明确存在的信息，禁止编造内容\n"
+        "1. **原文提取**：除**原因分析**外，仅使用文档中明确存在的信息，禁止编造内容\n"
         "2. **字段保留**：维持所有现有字段名称和结构，无对应内容则留空字符串(\"\")\n"
         "3. **输出格式**：输出待填充JSON模板，不要有任何无关字符。\n"
         "4. **文档类型**：根据文档名判断该文档是否与“考核”、“培训”相关\n"
-        "5. **格式规范**：\n"
+        "5. **原因分析**：如果**存在问题**不为空，则请作为专家结合文档从多方面（3-5个）给出自己的分析，并以层级结构回答，格式请严格参照JSON模板。\n"
+        "6. **格式规范**：\n"
         "   - 时间格式 → \"YYYY年MM月DD日\" 或 \"YYYY-MM-DD\"\n"
         "   - 百分数 → \"XX.X%\"（如\"92.2%\"）\n"
         "   - 数值 → 保留整数（如\"804\"）或1位小数（如\"37.5\"）\n"
@@ -76,6 +77,11 @@ def use_ai_get_mid_output(full_text, client: Client, client_config: dict):
         "      \"正确率均值\": \"\",\n"
         "      \"受训者看法\": \"\",\n"
         "      \"存在问题\": \"\",\n"
+        "      \"原因分析\": {\n"
+        "        \"\": [\n"
+        "          \"\",\n"
+        "          ],\n"
+        "       }\n"
         "      \"整改措施\": \"\",\n"
         "    }\n"
         "  },\n"
@@ -99,8 +105,12 @@ def use_ai_get_mid_output(full_text, client: Client, client_config: dict):
         "  },\n"
         "  {\n"
         "    \"考核问题和分析\": {\n"
-        "      \"考核类型及存在问题\": \"\",\n"
-        "      \"不及格主要原因\": \"\"\n"
+        "      \"存在问题\": \"\",\n"
+        "      \"原因分析\": {\n"
+        "        \"\": [\n"
+        "          \"\",\n"
+        "          ],\n"
+        "       }\n"
         "      \"整改措施\": \"\",\n"
         "    }\n"
         "  },\n"
@@ -158,7 +168,7 @@ def use_ai_get_mid_output(full_text, client: Client, client_config: dict):
     #     f"{full_text}\n"
     # )
     response = client.chat(prompt, **client_config)
-    # print(f'response=\n{response}\n-------------------\n')
+    print(f'response=\n{response}\n-------------------\n')
     result=deal_response(response)
     return result
 
@@ -246,10 +256,11 @@ if __name__ == "__main__":
     start_time=time.time()
     processor = DocumentProcessor()
     processor.process_file("./data/2025年5月护理部理论知识培训.docx")
-    # processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
-    # processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
-    user_prompt =  "生成护理部理论知识培训报告"
-    # user_prompt = "生成5月手卫生培训与专项考核报告"
+    processor.process_file("./data/2025年5月手卫生执行专项培训与评估总结.pdf")
+    processor.process_file("./data/手卫生培训各科室参与与考核情况统计.xlsx")
+
+    user_prompt = "生成5月手卫生培训与专项考核报告"
+    # user_prompt =  "生成护理部理论知识培训报告"
     extract_data = extract_information_fast(processor.get_data(), user_prompt, threshold=0.3)
 
     api_key="your-api-key"
@@ -264,7 +275,7 @@ if __name__ == "__main__":
     raw_output = use_ai_get_mid_output(full_text, client, client_config)
     
     raw_output.extend(table_data)
-    with open('raw_output_word.json','w',encoding='utf-8') as f:
+    with open('raw_output_pdf_and_xlsx.json','w',encoding='utf-8') as f:
         json.dump(raw_output,f,ensure_ascii=False,indent=2)
     # ai生成总结和建议
     use_ai_get_conclusion(extract_data, client, client_config)
