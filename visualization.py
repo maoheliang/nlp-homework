@@ -51,6 +51,7 @@ html_template = """
         .quote-block {
             background: #f9f9f9;
             border-left: 5px solid #3498db;
+            width: 95%;
             padding: 15px;
             margin-top: 30px;
             margin-bottom: 30px;
@@ -70,10 +71,11 @@ html_template = """
     
 
     <div class="section">
+    <h2>{{ idx1 }}、总结&建议</h2>
+     <p style="width: 95%">{{ evaluation }}</p>
     <div class="quote-block">
-        <h2>{{ idx1 }}、总结&建议</h2>
-        <p>{{ evaluation }}</p>
-        <hr>
+        
+       
         <p>1.{{ advice1 }}</p>
         <p>2.{{ advice2 }}</p>
         <p>3.{{ advice3 }}</p>
@@ -144,17 +146,38 @@ if "col_2" in data.keys() and "col_3" in data.keys():
     bar_html = bar_chart.to_html(include_plotlyjs=False, full_html=False)
     pie_html = pie_chart.to_html(include_plotlyjs=False, full_html=False)
     train_table = """
-    <table border="1" cellspacing="0" cellpadding="5">\n
+    <table border="1" cellspacing="0" cellpadding="5" style="margin-top: 40px;">\n
     
     """
-    train_table += "<tr><th>指标</th><th>数据</th></tr>\n"
+    train_table += """<tr><th>指标</th><th>数据</th></tr>
+    <caption style="caption-side: top; font-weight: bold; font-size: 18px; margin-bottom: 10px;">
+    培训总体情况
+  </caption>"""
     t = data["trainingParticipation"]["fields"]
-    for item in t:
-        label = item["label"]
-        value = item["value"] if item["value"] else "/"
-        train_table += f"<tr><td>{label}</td><td>{value}</td></tr>\n"
+    def render_value(value):
+        if isinstance(value, str):
+            return value.strip() if value.strip() else '/'
+        elif isinstance(value, dict):
+            parts = []
+            for k, v in value.items():
+                parts.append(f'<p><strong>{k}：</strong></p>')
+                if isinstance(v, list):
+                    parts.append('<ul>')
+                    for item in v:
+                        parts.append(f'<p>{item}</p>')
+                    parts.append('</ul>')
+                elif isinstance(v, str):
+                    parts.append(f'<p>{v}</p>')
+            return "\n".join(parts)
+        else:
+            return '/'
 
-    train_table += "</table>"
+    for field in t:
+        label = field["label"]
+        value_html = render_value(field["value"])
+        train_table += f"<tr><td>{label}</td><td>{value_html}</td></tr>\n"
+
+    train_table += '</table>'
     h = """<div class="section">
         <h2>二、{{ caption2 }}</h2>
         <div class="chart-box">
@@ -169,11 +192,62 @@ if "col_2" in data.keys() and "col_3" in data.keys():
             {{ pie_chart | safe }}
         </div>
     </div>"""
+    h = h.replace("<!-- %%ORG_OVERVIEW_TRAIN%% -->", train_table)
     html_template = html_template.replace("<!-- %%ORG_OVERVIEW_CHART%% -->",h)
     
 else:
     bar_html, pie_html, problem = None, None, None
-    num = 2
+    num = 3
+    train_table = """
+    <table border="1" cellspacing="0" cellpadding="5">\n
+    
+    """
+    train_table += """<tr><th>指标</th><th>数据</th></tr>
+    <caption style="caption-side: top; font-weight: bold; font-size: 18px; margin-bottom: 10px;">
+    培训总体情况
+  </caption>"""
+    t = data["trainingParticipation"]["fields"]
+    def render_value(value):
+        if isinstance(value, str):
+            return value.strip() if value.strip() else '/'
+        elif isinstance(value, dict):
+            parts = []
+            for k, v in value.items():
+                parts.append(f'<p><strong>{k}：</strong></p>')
+                if isinstance(v, list):
+                    parts.append('<ul>')
+                    for item in v:
+                        parts.append(f'<p>{item}</p>')
+                    parts.append('</ul>')
+                elif isinstance(v, str):
+                    parts.append(f'<p>{v}</p>')
+            return "\n".join(parts)
+        else:
+            return '/'
+
+    for field in t:
+        label = field["label"]
+        value_html = render_value(field["value"])
+        train_table += f"<tr><td>{label}</td><td>{value_html}</td></tr>\n"
+
+    train_table += '</table>'
+    # for item in t:
+    #     label = item["label"]
+    #     if label in ["存在问题", "原因分析", "整改措施"]:
+    #         value = item["value"] if item["value"] else "/"
+
+    #     else:
+    #         value = item["value"] if item["value"] else "/"
+    #         train_table += f"<tr><td>{label}</td><td>{value}</td></tr>\n"
+
+    # train_table += "</table>"
+    h = """<div class="section">
+        <h2>二、{{ caption2 }}</h2>
+        
+        <!-- %%ORG_OVERVIEW_TRAIN%% -->
+    </div>"""
+    h = h.replace("<!-- %%ORG_OVERVIEW_TRAIN%% -->", train_table)
+    html_template = html_template.replace("<!-- %%ORG_OVERVIEW_CHART%% -->",h)
 
 def generate_mermaid_graph(data):
     overview = {item['label']: item['value'] for item in data['orgOverview']['fields']}
@@ -181,8 +255,18 @@ def generate_mermaid_graph(data):
     metrics = {item['label']: item['value'] for item in data['assessmentChart']['metrics']}
     rect_steps = data['conclusionSummary']['rectificationFlow']['steps']
 
-    # 使用默认值避免空字段导致图表破损
-    def get_safe(value): return value if value else "N/A"
+    def get_safe(value):
+        return value if value else "N/A"
+
+    # 提取“存在问题”字段（字符串或对象）
+    problem_info = participation.get("存在问题", "无")
+    if isinstance(problem_info, dict):
+        summary = problem_info.get("总结", "")
+        details = problem_info.get("具体问题", [])
+        detail_text = "\\n".join(details)
+        problem_text = f"{summary}\\n{detail_text}" if details else summary
+    else:
+        problem_text = get_safe(problem_info)
 
     step_nodes = ''
     last_step = 'J'
@@ -192,18 +276,18 @@ def generate_mermaid_graph(data):
         last_step = node_id
 
     mermaid_text = f"""
-            graph TD
-            A[启动专项培训\\n{get_safe(overview.get("培训主题"))}] --> B[组织部门: {get_safe(overview.get("组织部门"))}]
-            B --> C[培训形式: {get_safe(overview.get("培训形式"))}]
-            C --> D[培训内容实施]
-            D --> E[整体参训率: {get_safe(participation.get("整体参训率"))}]
-            E --> F[理论考试平均成绩: {get_safe(metrics.get("理论考试平均成绩"))}]
-            F --> G[操作合格率: {get_safe(metrics.get("操作评估合格率"))}]
-            G --> H{{是否达标}}
-            H -- 是 --> I[最终通过率: {get_safe(metrics.get("最终通过率"))}]
-            H -- 否 --> J[问题分析: {get_safe(participation.get("存在问题"))}]
-            I --> K[总结与持续改进]{step_nodes}
-            """
+        graph TD
+        A[启动专项培训\\n{get_safe(overview.get("培训主题"))}] --> B[组织部门: {get_safe(overview.get("组织部门"))}]
+        B --> C[培训形式: {get_safe(overview.get("培训形式"))}]
+        C --> D[培训内容实施]
+        D --> E[整体参训率: {get_safe(participation.get("整体参训率"))}]
+        E --> F[理论考试平均成绩: {get_safe(metrics.get("理论考试平均成绩"))}]
+        F --> G[操作合格率: {get_safe(metrics.get("操作评估合格率"))}]
+        G --> H{{是否达标}}
+        H -- 是 --> I[最终通过率: {get_safe(metrics.get("最终通过率"))}]
+        H -- 否 --> J[问题分析: {problem_text}]
+        I --> K[总结与持续改进]{step_nodes}
+    """
     return mermaid_text.strip()
 
 mermaid_code = generate_mermaid_graph(data)
