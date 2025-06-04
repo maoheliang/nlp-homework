@@ -67,7 +67,7 @@ html_template = """
         h1, h2 { color: #2c3e50; }
         .section { margin-bottom: 50px; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        table { width: 60%; border-collapse: collapse; margin-top: 15px; margin: 0 auto;}
         th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
         th { background-color: #e9f2fb; font-weight: bold; }
 
@@ -171,7 +171,7 @@ mermaid_code = generate_mermaid_graph(data)
 overview = data["orgOverview"]
 section_title = overview["section"]
 fields = overview["fields"]
-html_table = f'<h2>{section_title}</h2>\n<table border="1" cellspacing="0" cellpadding="5">\n'
+html_table = f'<h2>一、{section_title}</h2>\n<table border="1" cellspacing="0" cellpadding="5">\n'
 html_table += "<tr><th>项目</th><th>内容</th></tr>\n"
 
 for item in fields:

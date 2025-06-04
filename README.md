@@ -5,7 +5,7 @@
 请确保安装以下依赖：
 
 ```bash
-pip install pandas pdfplumber python-docx python-pptx pytesseract openpyxl jieba openai requests beautifulsoup4 sentence_transformers hnswlib
+pip install pandas pdfplumber python-docx python-pptx pytesseract openpyxl jieba openai requests beautifulsoup4 sentence_transformers hnswlib plotly Jinja2
 ```
 jieba推荐版本0.41.0
 
@@ -152,4 +152,18 @@ print(extract_data)
 - "assessmentAnalysis"：培训及考核情况分析（可用于根因分析鱼骨图制作）
 - "col_1"-"col_8"：对应手卫生培训各科室参与与考核情况统计.xlsx中各科室的详细数据
 - "conclusionSummary":总结与建议（可用作整改流程图制作)
+
+## 可视化
+
+##### 文件：visualization.py
+
+##### 输入：json中间结果
+
+##### 输出：html可视化文件
+
+##### 运行：
+
+```bash
+python visualization.py
+```
 
