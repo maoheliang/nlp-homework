@@ -157,13 +157,17 @@ print(extract_data)
 
 ##### 文件：visualization.py
 
-##### 输入：json中间结果
+##### 输入：json中间结果（适配两个json中间结果输入：output/mid_output_pdf_and_xlsx.json 或 output/mid_output_word.json）
 
 ##### 输出：html可视化文件
+
+##### 依赖：./fishbone1.0
 
 ##### 运行：
 
 ```bash
 python visualization.py
 ```
+
+*注意：路径下需要有fishbone1.0文件夹，否则无法显示鱼骨图！*
 
