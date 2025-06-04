@@ -1,7 +1,7 @@
 import json
 import plotly.graph_objects as go
 from jinja2 import Template
-
+import os
 
 # HTML 模板（含样式美化）
 html_template = """
@@ -9,8 +9,11 @@ html_template = """
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>护理部培训可视化报告</title>
+    <title>可视化报告</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="fishbone1.0/require/jquery-1.11.1.min.js"></script>
+    <script src="fishbone1.0/FishBone.js"></script>
+    <link rel="stylesheet" type="text/css" href="fishbone1.0/css/base.css">
     <script type="module">
     {% raw %}
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
@@ -18,6 +21,13 @@ html_template = """
         {% endraw %}
     </script>
     <style>
+        *{
+          box-sizing:border-box;
+        }
+        #bone-container {
+          width: 100%;
+          height: 400px;
+        }
         body { font-family: "Segoe UI", sans-serif; margin: 40px; background: #f8f9fa; color: #2c3e50; }
         h1, h2 { color: #2c3e50; }
 
@@ -50,7 +60,7 @@ html_template = """
     </style>
 </head>
 <body>
-    <h1>护理部培训可视化报告（2025年5月）</h1>
+    <h1>可视化报告（2025年5月）</h1>
 
     <div class="section">
     <!-- %%ORG_OVERVIEW_TABLE%% -->
@@ -77,8 +87,19 @@ html_template = """
     </div>
     <div class="section">
         <h2>{{ idx3 }}、鱼骨图</h2>
-        
+        <div id="bone-container"></div>
     </div>
+    <script>
+    $(document).ready(function () {
+      const width = $('#bone-container').innerWidth();
+      const height = $('#bone-container').innerHeight();
+        $("#bone-container").FishBone({
+            jsonData: testFishData,
+            canvasSize: [width,height],
+            showToolbar: true,
+        });
+    });
+</script>
     
 </body>
 </html>
@@ -122,12 +143,24 @@ if "col_2" in data.keys() and "col_3" in data.keys():
     # 转换为 HTML 片段
     bar_html = bar_chart.to_html(include_plotlyjs=False, full_html=False)
     pie_html = pie_chart.to_html(include_plotlyjs=False, full_html=False)
-    html_template = html_template.replace("<!-- %%ORG_OVERVIEW_CHART%% -->",
-    """<div class="section">
-        <h2>二、{{caption2}}</h2>
+    train_table = """
+    <table border="1" cellspacing="0" cellpadding="5">\n
+    
+    """
+    train_table += "<tr><th>指标</th><th>数据</th></tr>\n"
+    t = data["trainingParticipation"]["fields"]
+    for item in t:
+        label = item["label"]
+        value = item["value"] if item["value"] else "/"
+        train_table += f"<tr><td>{label}</td><td>{value}</td></tr>\n"
+
+    train_table += "</table>"
+    h = """<div class="section">
+        <h2>二、{{ caption2 }}</h2>
         <div class="chart-box">
             {{ bar_chart | safe }}
         </div>
+        <!-- %%ORG_OVERVIEW_TRAIN%% -->
     </div>
 
     <div class="section">
@@ -135,10 +168,11 @@ if "col_2" in data.keys() and "col_3" in data.keys():
         <div class="chart-box">
             {{ pie_chart | safe }}
         </div>
-    </div>""")
+    </div>"""
+    html_template = html_template.replace("<!-- %%ORG_OVERVIEW_CHART%% -->",h)
     
 else:
-    bar_html, pie_html, problem1 = None, None, None
+    bar_html, pie_html, problem = None, None, None
     num = 2
 
 def generate_mermaid_graph(data):
@@ -188,6 +222,73 @@ html_table += "</table>"
 
 final_html = html_template.replace("<!-- %%ORG_OVERVIEW_TABLE%% -->", html_table)
 chinese_nums = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+
+
+# 构建鱼骨图数据
+def generate_fishbone_data(data):
+    fishbone_data = []
+
+    # 主问题作为鱼骨图的主干
+    main_problem = data["assessmentAnalysis"]["mainProblem"]
+
+    # 创建主干节点
+    main_node = {
+        "id": "1",
+        "fid": "0",
+        "name": main_problem,
+        "fontColor": "",
+        "lineColor": "",
+        "children": []
+    }
+
+    # 添加各个类别作为鱼骨的主要分支
+    for idx, cause in enumerate(data["assessmentAnalysis"]["causes"], 1):
+        category = cause["category"]
+        category_id = f"100{idx}"
+
+        # 创建分类节点
+        category_node = {
+            "id": category_id,
+            "fid": "1",
+            "name": category,
+            "fontColor": "",
+            "lineColor": "",
+            "children": []
+        }
+
+        # 添加每个类别下的详细原因
+        for detail_idx, detail in enumerate(cause["details"], 1):
+            detail_id = f"{category_id}{detail_idx}" + str(hash(detail) % 10000)
+
+            # 创建详细原因节点
+            detail_node = {
+                "id": detail_id,
+                "fid": category_id,
+                "name": detail,
+                "fontColor": "",
+                "lineColor": "",
+                "children": []
+            }
+
+            # 将详细原因添加到对应类别下
+            category_node["children"].append(detail_node)
+
+        # 将类别添加到主干下
+        main_node["children"].append(category_node)
+
+    # 添加主干到鱼骨图数据中
+    fishbone_data.append(main_node)
+
+    return fishbone_data
+
+# 生成鱼骨图数据
+fishbone_data = generate_fishbone_data(data)
+
+# 将鱼骨图数据添加到HTML模板
+fishbone_data_js = f"var testFishData = {json.dumps(fishbone_data, ensure_ascii=False, indent=2)};"
+# print(fishbone_data_js,'====fishbone_data_js')
+# 在渲染HTML之前添加鱼骨图数据到final_html而不是html_template
+final_html = final_html.replace("</head>", f"<script>{fishbone_data_js}</script>\n</head>")
 # 渲染 HTML
 template = Template(final_html)
 rendered_html = template.render(
@@ -196,7 +297,7 @@ rendered_html = template.render(
     bar_chart=bar_html,
     pie_chart=pie_html,
     evaluation=data["conclusionSummary"]['summary']['content'],
-    problem=problem1,
+    problem=problem,
     advice1=data['conclusionSummary']['rectificationFlow']['steps'][0]['value'],
     advice2=data['conclusionSummary']['rectificationFlow']['steps'][1]['value'],
     advice3=data['conclusionSummary']['rectificationFlow']['steps'][2]['value'],
