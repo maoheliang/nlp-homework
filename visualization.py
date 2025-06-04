@@ -11,9 +11,9 @@ html_template = """
     <meta charset="UTF-8">
     <title>可视化报告</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="fishbone1.0/require/jquery-1.11.1.min.js"></script>
-    <script src="fishbone1.0/FishBone.js"></script>
-    <link rel="stylesheet" type="text/css" href="fishbone1.0/css/base.css">
+    <script src="../fishbone1.0/require/jquery-1.11.1.min.js"></script>
+    <script src="../fishbone1.0/FishBone.js"></script>
+    <link rel="stylesheet" type="text/css" href="../fishbone1.0/css/base.css">
     <script type="module">
     {% raw %}
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
