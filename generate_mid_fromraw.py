@@ -54,37 +54,41 @@ output_json["assessmentChart"] = {
     "metrics": [{"label": k, "value": v} for k, v in assessment_result.items()]
 }
 
+
 # ========== 4+. 考核情况分析（鱼骨图） ========== #
-# 自动从多个字段中提取“存在问题”、“原因分析” → 鱼骨图结构
+# 自动从多个字段中提取“存在问题”->“总结” 和 “原因分析” → 鱼骨图结构
 def extract_fishbone_components(*sections):
-    main_problem = set()
+    main_problem_parts = []  # 存放两个总结拼接
     causes = []
 
     for section in sections:
         if not isinstance(section, dict):
             continue
 
-        # 收集所有存在问题
-        problem = section.get("存在问题", "").strip()
-        if problem:
-            main_problem.add(problem)
+        # 收集“存在问题”中的“总结”
+        problem_dict = section.get("存在问题", {})
+        if isinstance(problem_dict, dict):
+            summary = problem_dict.get("总结", "").strip()
+            if summary:
+                main_problem_parts.append(summary)
 
-        # 提取原因分析
+        # 收集“原因分析”部分
         reasons = section.get("原因分析", {})
         if isinstance(reasons, dict):
             for cat, detail in reasons.items():
                 detail_list = detail if isinstance(detail, list) else [detail]
                 causes.append({
                     "category": cat,
-                    "details": [d.strip() for d in detail_list if d.strip()]
+                    "details": [d.strip() for d in detail_list if isinstance(d, str) and d.strip()]
                 })
 
     return {
         "section": "培训及考核情况分析（鱼骨图）",
-        "mainProblem": "；".join(main_problem),
+        "mainProblem": "；".join(main_problem_parts),
         "causes": causes
     }
 
+# 示例调用（你应该在你的主函数里使用这一句）
 output_json["assessmentAnalysis"] = extract_fishbone_components(
     raw_data[2].get("培训参与情况和分析", {}),
     raw_data[5].get("考核问题和分析", {})
@@ -128,7 +132,7 @@ if len(raw_data) > 6 and "手卫生培训各科室参与与考核情况统计" i
 # ========== 6. 读取并处理 conclusion.json ========== #
 import re
 
-with open("C:\\A课程作业\\nlp\\nlp-homework-main\\input\\conclusion_pdf_and_xlsx.json", "r", encoding="utf-8") as f:
+with open("C:\\A课程作业\\nlp\\nlp-homework-main\\input\\conclusion_word.json", "r", encoding="utf-8") as f:
     conclusion = json.load(f)
 
 summary_text = conclusion.get("总结", "")
