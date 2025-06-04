@@ -1,7 +1,7 @@
 import json
 
 # ========== 读取原始 JSON ========== #
-with open("C:\\A课程作业\\nlp\\nlp-homework-main\\input\\raw_output_pdf_and_xlsx.json", "r", encoding="utf-8") as f:
+with open("C:\\A课程作业\\nlp\\nlp-homework-main\\input\\1_raw_add_reason\\raw_output_word.json", "r", encoding="utf-8") as f:
     raw_data = json.load(f)
 
 output_json = {}
@@ -42,7 +42,7 @@ output_json["trainingParticipation"] = {
 # ========== 4. 考核内容、结果、自动分析 ========== #
 assessment_detail = raw_data[3]["考核内容"]
 assessment_result = raw_data[4]["考核结果"]
-assessment_analysis = raw_data[5]["考核分析"]
+assessment_analysis = raw_data[5]["考核问题和分析"]
 
 output_json["assessmentDetail"] = {
     "section": "考核内容",
@@ -54,30 +54,41 @@ output_json["assessmentChart"] = {
     "metrics": [{"label": k, "value": v} for k, v in assessment_result.items()]
 }
 
-#  自动提取“鱼骨图”根因字段
-main_problem = ""
-auto_causes = []
+# ========== 4+. 考核情况分析（鱼骨图） ========== #
+# 自动从多个字段中提取“存在问题”、“原因分析” → 鱼骨图结构
+def extract_fishbone_components(*sections):
+    main_problem = set()
+    causes = []
 
-for key, value in assessment_analysis.items():
-    if not value:
-        continue  # 跳过空内容
-    # 如果 key 中含有“主要原因”或“根本原因”，认为是 mainProblem
-    if any(kw in key for kw in ["主要原因", "根本原因", "关键问题", "主因"]):
-        main_problem = value.strip()
-        details = [main_problem]
-    else:
-        # 其他字段仍作为鱼骨图的分类原因
-        details = value.split("、") if "、" in value else [value.strip()]
-    auto_causes.append({
-        "category": key,
-        "details": details
-    })
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
 
-output_json["assessmentAnalysis"] = {
-    "section": "考核情况分析（鱼骨图）",
-    "mainProblem": main_problem,
-    "causes": auto_causes
-}
+        # 收集所有存在问题
+        problem = section.get("存在问题", "").strip()
+        if problem:
+            main_problem.add(problem)
+
+        # 提取原因分析
+        reasons = section.get("原因分析", {})
+        if isinstance(reasons, dict):
+            for cat, detail in reasons.items():
+                detail_list = detail if isinstance(detail, list) else [detail]
+                causes.append({
+                    "category": cat,
+                    "details": [d.strip() for d in detail_list if d.strip()]
+                })
+
+    return {
+        "section": "培训及考核情况分析（鱼骨图）",
+        "mainProblem": "；".join(main_problem),
+        "causes": causes
+    }
+
+output_json["assessmentAnalysis"] = extract_fishbone_components(
+    raw_data[2].get("培训参与情况和分析", {}),
+    raw_data[5].get("考核问题和分析", {})
+)
 
 # ========== 5. 各科室参与与考核统计 Sheet 拆分 ========== #
 if len(raw_data) > 6 and "手卫生培训各科室参与与考核情况统计" in raw_data[6]:
@@ -159,7 +170,7 @@ output_json["conclusionSummary"] = {
 }
 
 # ========== 写入结构化 JSON 文件 ========== #
-with open("C:\\A课程作业\\nlp\\nlp-homework-main\\input\\mid_output_pdf_and_xlsx.json", "w", encoding="utf-8") as f:
+with open("C:\\A课程作业\\nlp\\nlp-homework-main\\input\\1_raw_add_reason\\mid_output_word.json", "w", encoding="utf-8") as f:
     json.dump(output_json, f, ensure_ascii=False, indent=2)
 
 print("json 已生成")
