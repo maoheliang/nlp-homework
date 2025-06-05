@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>可视化报告</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="../fishbone1.0/require/jquery-1.11.1.min.js"></script>
+    <script src="../fishbone1.0/FishBone.js"></script>
+    <link rel="stylesheet" type="text/css" href="../fishbone1.0/css/base.css">
+    <script type="module">
+    
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+        
+    </script>
+    <style>
+        *{
+          box-sizing:border-box;
+        }
+        #bone-container {
+          width: 100%;
+          height: 400px;
+        }
+        body { font-family: "Segoe UI", sans-serif; margin: 40px; background: #f8f9fa; color: #2c3e50; }
+        h1, h2 { color: #2c3e50; }
+
+        .section { margin-bottom: 50px; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+        table { width: 60%; border-collapse: collapse; margin-top: 15px; margin: 0 auto;}
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        th { background-color: #e9f2fb; font-weight: bold; }
+
+        p { line-height: 1.6; }
+
+        .chart-box { max-width: 1400px; margin: 0 auto;  }
+        .mermaid {
+            margin: 0 auto; 
+            max-width: 800px; 
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+        }
+        .quote-block {
+            background: #f9f9f9;
+            border-left: 5px solid #3498db;
+            width: 95%;
+            padding: 15px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            color: #333;
+            line-height: 1.6;
+        }
+    </style>
+<script>var testFishData = [
+  {
+    "id": "1",
+    "fid": "0",
+    "name": "部分科室参训不足；操作考核问题较多",
+    "fontColor": "",
+    "lineColor": "",
+    "children": [
+      {
+        "id": "1001",
+        "fid": "1",
+        "name": "排班与调度问题",
+        "fontColor": "",
+        "lineColor": "",
+        "children": [
+          {
+            "id": "100117291",
+            "fid": "1001",
+            "name": "1、外科和康复医学科的轮班制度导致部分人员无法参加培训",
+            "fontColor": "",
+            "lineColor": "",
+            "children": []
+          },
+          {
+            "id": "100124358",
+            "fid": "1001",
+            "name": "2、任务调度安排不够灵活，未能充分考虑培训时间",
+            "fontColor": "",
+            "lineColor": "",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1002",
+        "fid": "1",
+        "name": "培训形式适应性",
+        "fontColor": "",
+        "lineColor": "",
+        "children": [
+          {
+            "id": "100219892",
+            "fid": "1002",
+            "name": "1、部分医护人员可能对线上学习形式不够熟悉，影响学习效果",
+            "fontColor": "",
+            "lineColor": "",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1003",
+        "fid": "1",
+        "name": "培训时间安排",
+        "fontColor": "",
+        "lineColor": "",
+        "children": [
+          {
+            "id": "10031571",
+            "fid": "1003",
+            "name": "1、培训时间安排可能未能充分考虑到各科室的工作高峰期",
+            "fontColor": "",
+            "lineColor": "",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1004",
+        "fid": "1",
+        "name": "操作规范掌握不足",
+        "fontColor": "",
+        "lineColor": "",
+        "children": [
+          {
+            "id": "100412739",
+            "fid": "1004",
+            "name": "1、部分医护人员对洗手流程和动作标准性掌握不够熟练",
+            "fontColor": "",
+            "lineColor": "",
+            "children": []
+          },
+          {
+            "id": "100425281",
+            "fid": "1004",
+            "name": "2、实际操作中可能存在习惯性错误，未能及时纠正",
+            "fontColor": "",
+            "lineColor": "",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1005",
+        "fid": "1",
+        "name": "培训效果转化不足",
+        "fontColor": "",
+        "lineColor": "",
+        "children": [
+          {
+            "id": "100512425",
+            "fid": "1005",
+            "name": "1、培训内容在实际操作中的转化效果不够理想",
+            "fontColor": "",
+            "lineColor": "",
+            "children": []
+          },
+          {
+            "id": "100527420",
+            "fid": "1005",
+            "name": "2、部分医护人员可能未能充分理解培训内容",
+            "fontColor": "",
+            "lineColor": "",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1006",
+        "fid": "1",
+        "name": "考核标准执行严格",
+        "fontColor": "",
+        "lineColor": "",
+        "children": [
+          {
+            "id": "100615621",
+            "fid": "1006",
+            "name": "1、考核标准可能较为严格，导致部分医护人员未能通过",
+            "fontColor": "",
+            "lineColor": "",
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+];</script>
+</head>
+<body>
+    <h1>可视化报告（2025年5月）</h1>
+
+    <div class="section">
+    <h2>一、培训组织概况</h2>
+<table border="1" cellspacing="0" cellpadding="5">
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>培训时间</td><td>2025年5月10日至5月25日</td></tr>
+<tr><td>培训主题</td><td>手卫生执行力与依从性</td></tr>
+<tr><td>组织部门</td><td>医院感控科联合护理部</td></tr>
+<tr><td>培训对象</td><td>所有在岗临床医护人员</td></tr>
+<tr><td>授课专家</td><td>/</td></tr>
+<tr><td>培训形式</td><td>线上学习+线下集中授课</td></tr>
+<tr><td>培训目的</td><td>强化临床感染防控意识与手卫生规范执行能力</td></tr>
+<tr><td>线下培训</td><td>10场</td></tr>
+<tr><td>线上培训</td><td>3轮</td></tr>
+</table>
+        
+    </div>
+    <div class="section">
+        <h2>二、培训参与情况和分析</h2>
+        <div class="chart-box">
+            <div>                            <div id="97385f35-62b6-42d7-b036-3f4a4007250d" class="plotly-graph-div" style="height:100%; width:1400px;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("97385f35-62b6-42d7-b036-3f4a4007250d")) {                    Plotly.newPlot(                        "97385f35-62b6-42d7-b036-3f4a4007250d",                        [{"marker":{"color":"rgb(52, 152, 219)"},"name":"\u53c2\u8bad\u4eba\u6570","x":["ICU","\u6025\u8bca\u79d1","\u624b\u672f\u5ba4","\u5916\u79d1\u4e00\u75c5\u533a","\u5916\u79d1\u4e8c\u75c5\u533a","\u5185\u79d1","\u513f\u79d1","\u5eb7\u590d\u533b\u5b66\u79d1","\u4e2d\u533b\u79d1","\u611f\u63a7\u79d1","\u5987\u4ea7\u79d1","\u91cd\u75c7\u533b\u5b66\u79d1","\u795e\u7ecf\u5185\u79d1","\u795e\u7ecf\u5916\u79d1","\u547c\u5438\u79d1","\u76ae\u80a4\u79d1","\u68c0\u9a8c\u79d1","\u653e\u5c04\u79d1","\u9ebb\u9189\u79d1","\u836f\u5242\u79d1"],"y":[45,38,56,57,52,66,46,36,22,9,47,33,35,31,37,15,22,19,18,12],"type":"bar"},{"marker":{"color":"rgb(52, 152, 29)"},"name":"\u7f3a\u52e4\u4eba\u6570","x":["ICU","\u6025\u8bca\u79d1","\u624b\u672f\u5ba4","\u5916\u79d1\u4e00\u75c5\u533a","\u5916\u79d1\u4e8c\u75c5\u533a","\u5185\u79d1","\u513f\u79d1","\u5eb7\u590d\u533b\u5b66\u79d1","\u4e2d\u533b\u79d1","\u611f\u63a7\u79d1","\u5987\u4ea7\u79d1","\u91cd\u75c7\u533b\u5b66\u79d1","\u795e\u7ecf\u5185\u79d1","\u795e\u7ecf\u5916\u79d1","\u547c\u5438\u79d1","\u76ae\u80a4\u79d1","\u68c0\u9a8c\u79d1","\u653e\u5c04\u79d1","\u9ebb\u9189\u79d1","\u836f\u5242\u79d1"],"y":[0,0,0,5,8,4,3,6,3,0,1,0,3,5,3,0,0,1,0,0],"type":"bar"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmapgl":[{"type":"heatmapgl","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"title":{"text":"\u5404\u79d1\u5ba4\u53c2\u4e0e\u57f9\u8bad\u60c5\u51b5","x":0.5,"xanchor":"center"},"barmode":"stack","xaxis":{"title":{"text":"\u79d1\u5ba4"}},"yaxis":{"title":{"text":"\u4eba\u6570"}},"width":1400},                        {"responsive": true}                    )                };                            </script>        </div>
+        </div>
+        
+    <table border="1" cellspacing="0" cellpadding="5" style="margin-top: 40px;">
+
+    
+    <tr><th>指标</th><th>数据</th></tr>
+    <caption style="caption-side: top; font-weight: bold; font-size: 18px; margin-bottom: 10px;">
+    培训总体情况
+  </caption><tr><td>应参加人数</td><td>872</td></tr>
+<tr><td>实际参与人数</td><td>804</td></tr>
+<tr><td>覆盖正式护士人次</td><td>/</td></tr>
+<tr><td>覆盖实习护士人次</td><td>/</td></tr>
+<tr><td>缺勤人数</td><td>68</td></tr>
+<tr><td>线上参训率</td><td>/</td></tr>
+<tr><td>线下参训率</td><td>/</td></tr>
+<tr><td>整体参训率</td><td>92.2%</td></tr>
+<tr><td>关键岗位及完成率</td><td>ICU、急诊科、手术室、儿科、麻醉科等关键岗位完成率达100%</td></tr>
+<tr><td>线上课程学习平均用时</td><td>37分钟</td></tr>
+<tr><td>正确率均值</td><td>94.8%</td></tr>
+<tr><td>受训者看法</td><td>/</td></tr>
+<tr><td>存在问题</td><td><p><strong>总结：</strong></p>
+<p>部分科室参训不足</p>
+<p><strong>具体问题：</strong></p>
+<ul>
+<p>1、外科、康复医学科因轮班冲突或任务调度问题，部分人员未完成学习任务</p>
+</ul></td></tr>
+<tr><td>原因分析</td><td><p><strong>排班与调度问题：</strong></p>
+<ul>
+<p>1、外科和康复医学科的轮班制度导致部分人员无法参加培训</p>
+<p>2、任务调度安排不够灵活，未能充分考虑培训时间</p>
+</ul>
+<p><strong>培训形式适应性：</strong></p>
+<ul>
+<p>1、部分医护人员可能对线上学习形式不够熟悉，影响学习效果</p>
+</ul>
+<p><strong>培训时间安排：</strong></p>
+<ul>
+<p>1、培训时间安排可能未能充分考虑到各科室的工作高峰期</p>
+</ul></td></tr>
+<tr><td>整改措施</td><td>/</td></tr>
+</table>
+    </div>
+
+    <div class="section">
+        <h2>三、缺勤人数</h2>
+        <div class="chart-box">
+            <div>                            <div id="ea21007e-6f43-40de-aa16-ced3cbd46aec" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("ea21007e-6f43-40de-aa16-ced3cbd46aec")) {                    Plotly.newPlot(                        "ea21007e-6f43-40de-aa16-ced3cbd46aec",                        [{"hole":0.3,"labels":["ICU","\u6025\u8bca\u79d1","\u624b\u672f\u5ba4","\u5916\u79d1\u4e00\u75c5\u533a","\u5916\u79d1\u4e8c\u75c5\u533a","\u5185\u79d1","\u513f\u79d1","\u5eb7\u590d\u533b\u5b66\u79d1","\u4e2d\u533b\u79d1","\u611f\u63a7\u79d1","\u5987\u4ea7\u79d1","\u91cd\u75c7\u533b\u5b66\u79d1","\u795e\u7ecf\u5185\u79d1","\u795e\u7ecf\u5916\u79d1","\u547c\u5438\u79d1","\u76ae\u80a4\u79d1","\u68c0\u9a8c\u79d1","\u653e\u5c04\u79d1","\u9ebb\u9189\u79d1","\u836f\u5242\u79d1"],"values":[0,0,0,5,8,4,3,6,3,0,1,0,3,5,3,0,0,1,0,0],"type":"pie"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmapgl":[{"type":"heatmapgl","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"title":{"text":"\u7f3a\u52e4\u4eba\u6570","x":0.5,"xanchor":"center"}},                        {"responsive": true}                    )                };                            </script>        </div>
+        </div>
+    </div>
+    
+
+    <div class="section">
+    <h2>四、总结&建议</h2>
+     <p style="width: 95%">2025年5月，医院感控科联合护理部开展了全院手卫生专项培训与考核，覆盖所有临床医护人员，采用线上线下结合形式。培训内容包括WHO手卫生标准、洗手流程、案例分析和自查机制。参训率92.2%，关键科室完成率100%，但外科和康复医学科存在缺勤。理论考试平均成绩82.5，操作考核合格率87.4%，总体通过率89.7%。</p>
+    <div class="quote-block">
+        
+       
+        <p>1.针对外科和康复医学科等参训率较低的科室，优化培训时间安排或提供补训机会。</p>
+        <p>2.加强操作考核中的薄弱环节培训，如水量控制和指缝覆盖等细节问题。</p>
+        <p>3.定期开展手卫生复查和反馈机制，确保培训效果持续改进。</p>
+    </div>
+    </div>
+    <div class="section">
+        <h2>五、流程图</h2>
+        <div class="mermaid">
+            graph TD
+        A[启动专项培训\n手卫生执行力与依从性] --> B[组织部门: 医院感控科联合护理部]
+        B --> C[培训形式: 线上学习+线下集中授课]
+        C --> D[培训内容实施]
+        D --> E[整体参训率: 92.2%]
+        E --> F[理论考试平均成绩: 82.5]
+        F --> G[操作合格率: 87.4%]
+        G --> H{是否达标}
+        H -- 是 --> I[最终通过率: 89.7%]
+        H -- 否 --> J[问题分析: 部分科室参训不足\n1、外科、康复医学科因轮班冲突或任务调度问题，部分人员未完成学习任务]
+        I --> K[总结与持续改进]
+  J --> R1["针对外科和康复医学科等参训率较低的科室，优化培训时间安排或提供补训机会。"]
+  R1 --> R2["加强操作考核中的薄弱环节培训，如水量控制和指缝覆盖等细节问题。"]
+  R2 --> R3["定期开展手卫生复查和反馈机制，确保培训效果持续改进。"]
+        </div>
+    </div>
+    <div class="section">
+        <h2>六、鱼骨图</h2>
+        <div id="bone-container"></div>
+    </div>
+    <script>
+    $(document).ready(function () {
+      const width = $('#bone-container').innerWidth();
+      const height = $('#bone-container').innerHeight();
+        $("#bone-container").FishBone({
+            jsonData: testFishData,
+            canvasSize: [width,height],
+            showToolbar: true,
+        });
+    });
+</script>
+    
+</body>
+</html>
