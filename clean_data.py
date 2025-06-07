@@ -14,7 +14,7 @@ from imports import *
 import platform
 if platform.system() == "Windows":
     import win32com.client
-elif platform.system() == "Linux":
+elif platform.system() in ["Linux", "Darwin"]:
     import subprocess
 
 class IncrementalDocumentRetriever:
@@ -371,13 +371,16 @@ class DocumentProcessor:
             word.Quit()
             # 返回新的文件路径
             return new_path
-        elif platform.system() == "Linux":
+        elif platform.system() in ["Linux", "Darwin"]:
             # 定义新的文件路径，文件格式为docx
             new_path = doc_path + "x"
             # 使用subprocess库调用libreoffice命令行工具将doc文件转换为docx文件
-            subprocess.run(["libreoffice", "--headless", "--convert-to", "docx", "--outdir", os.path.dirname(doc_path), doc_path])
-            # 返回新的文件路径
-            return new_path
+            try:
+                subprocess.run(["libreoffice", "--headless", "--convert-to", "docx", "--outdir", os.path.dirname(doc_path), doc_path])
+                # 返回新的文件路径
+                return new_path
+            except subprocess.CalledProcessError as e:
+                print(f"Conversion failed: {e}")
         else:
             # 抛出异常，不支持当前操作系统
             raise EnvironmentError("Unsupported OS for .doc conversion")
