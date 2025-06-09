@@ -136,12 +136,12 @@ print(extract_data)
 ---
 
 
-## 生成中间json文件（更新，以此版为准！！！）
+## 生成中间json文件
 **代码位置：** `generate_raw_json.py`(对输入的文档进行初步内容提取）
 **输出文件位置：** `output/raw_output_pdf_and_xlsx.json`  `output/raw_output_word.json`  `output/conclusion_pdf_and_xlsx.json`  `output/conclusion_word.json`
 
 **代码位置：** `generate_mid_fromraw.py`（对raw_output_pdf_and_xlsx.json、raw_output_word.json进行格式转换）
-**输出文件位置：** `output/mid_output_pdf_and_xlsx.json`  `output/mid_output_word.json`（作业要求的中间json文件）
+**输出文件位置：** `output/mid_output_pdf_and_xlsx.json`  `output/mid_output_word.json`
 
 ### json结构说明
 - "orgOverview": 培训组织概况（可用作详情页展示）
